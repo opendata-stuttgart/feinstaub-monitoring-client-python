@@ -8,4 +8,6 @@ set your API_TOKEN in config.py
 
 ## run as cron
 
-(FIXME)
+```
+./run.sh
+```
