@@ -2,7 +2,7 @@
 
 ## config
 
-set your API_TOKEN in config.py
+set your API_TOKEN (and PUSHOVER tokens) in config.py
 
 (see config.py-template for example)
 
