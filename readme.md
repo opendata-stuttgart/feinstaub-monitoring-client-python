@@ -12,6 +12,9 @@ set your API_TOKEN (and PUSHOVER tokens) in config.py
 ./run.sh
 ```
 
+
+## virtualenv
+
 ```
 cp config.py-template config.py
 # edit config.py
