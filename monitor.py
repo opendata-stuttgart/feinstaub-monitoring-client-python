@@ -1,7 +1,15 @@
+#!/usr/bin/env python
 import requests
 import datetime
 import click
 from config import API_TOKEN, PUSHOVER_CLIENT_TOKEN, PUSHOVER_API_TOKEN
+# set to defaults, if not yet in config
+LAST_N_MINUTES=5
+LAST_N_HOURS=1
+try:
+    from config import LAST_N_HOURS, LAST_N_MINUTES
+except ImportError as e:
+    print (e.msg)
 from pushover import Client
 
 
@@ -17,8 +25,8 @@ def check(push, show):
         if node.get("last_data_push"):
             last_data_push = datetime.datetime.strptime(node.get("last_data_push")[:19],
                                                         "%Y-%m-%dT%H:%M:%S")
-            if last_data_push < datetime.datetime.utcnow() - datetime.timedelta(minutes=5):
-                if last_data_push > datetime.datetime.utcnow() - datetime.timedelta(hours=1):
+            if last_data_push < datetime.datetime.utcnow() - datetime.timedelta(minutes=LAST_N_MINUTES):
+                if last_data_push > datetime.datetime.utcnow() - datetime.timedelta(hours=LAST_N_HOURS):
                     uid = node.get('uid')
                     description = node.get('sensors', [{}])[0].get('description')
                     if push:
@@ -28,5 +36,5 @@ def check(push, show):
                     if show:
                         click.echo("{} | {:>35} | {}".format(last_data_push, uid, description))
 
-if __name__ == '__main__':
+if __name__ == '__main__':    
     check()
