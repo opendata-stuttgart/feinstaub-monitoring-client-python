@@ -11,3 +11,19 @@ set your API_TOKEN (and PUSHOVER tokens) in config.py
 ```
 ./run.sh
 ```
+
+
+## virtualenv
+
+```
+cp config.py-template config.py
+# edit config.py
+mkvirtualenv feinstaub-api-client -p /usr/bin/python3
+pip install -r requirements.txt
+python monitor.py
+deactivate
+# re-enter
+workon feinstaub-api-client
+```
+
+
