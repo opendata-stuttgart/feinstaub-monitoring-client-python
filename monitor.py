@@ -2,14 +2,13 @@
 import requests
 import datetime
 import click
-from config import API_TOKEN, PUSHOVER_CLIENT_TOKEN, PUSHOVER_API_TOKEN
-# set to defaults, if not yet in config
-LAST_N_MINUTES=5
-LAST_N_HOURS=1
-try:
-    from config import LAST_N_HOURS, LAST_N_MINUTES
-except ImportError as e:
-    print (e.msg)
+from config import (
+    API_TOKEN,
+    LAST_N_HOURS,
+    LAST_N_MINUTES,
+    PUSHOVER_API_TOKEN,
+    PUSHOVER_CLIENT_TOKEN,
+)
 from pushover import Client
 
 
