@@ -36,5 +36,5 @@ def check(push, show):
                     if show:
                         click.echo("{} | {:>35} | {}".format(last_data_push, uid, description))
 
-if __name__ == '__main__':    
+if __name__ == '__main__':
     check()
