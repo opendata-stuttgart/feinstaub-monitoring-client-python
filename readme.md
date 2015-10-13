@@ -8,10 +8,11 @@ set your API_TOKEN (and PUSHOVER tokens) in config.py
 
 ## run as cron
 
-```
-./run.sh
-```
+add to your crontab:
 
+```
+*/5 * * * * (cd /your_path_to/feinstaub-monitoring-client-python; bash ./run.sh > /dev/null)
+```
 
 ## virtualenv
 

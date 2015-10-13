@@ -2,15 +2,40 @@
 import requests
 import datetime
 import click
-from config import API_TOKEN, PUSHOVER_CLIENT_TOKEN, PUSHOVER_API_TOKEN
-# set to defaults, if not yet in config
-LAST_N_MINUTES=5
-LAST_N_HOURS=1
-try:
-    from config import LAST_N_HOURS, LAST_N_MINUTES
-except ImportError as e:
-    print (e.msg)
+import os
+import os.path
+from config import (
+    API_TOKEN,
+    LAST_N_HOURS,
+    LAST_N_MINUTES,
+    PUSHOVER_API_TOKEN,
+    PUSHOVER_CLIENT_TOKEN,
+)
 from pushover import Client
+
+
+locks_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locks')
+
+
+def check_file(sensor_id):
+    fn = os.path.join(locks_directory, '{}.lock'.format(sensor_id))
+    if os.path.isfile(fn):
+        with open(fn) as fp:
+            s = fp.readline().strip()
+        return datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S")
+    return False
+
+
+def update_file(sensor_id, timestamp):
+    fn = os.path.join(locks_directory, '{}.lock'.format(sensor_id))
+    with open(fn, 'w') as fp:
+        fp.write("{}\n".format(timestamp.isoformat()))
+
+
+def delete_file(sensor_id):
+    fn = os.path.join(locks_directory, '{}.lock'.format(sensor_id))
+    if os.path.isfile(fn):
+        os.remove(fn)
 
 
 @click.command()
@@ -25,16 +50,24 @@ def check(push, show):
         if node.get("last_data_push"):
             last_data_push = datetime.datetime.strptime(node.get("last_data_push")[:19],
                                                         "%Y-%m-%dT%H:%M:%S")
-            if last_data_push < datetime.datetime.utcnow() - datetime.timedelta(minutes=LAST_N_MINUTES):
-                if last_data_push > datetime.datetime.utcnow() - datetime.timedelta(hours=LAST_N_HOURS):
-                    uid = node.get('uid')
-                    description = node.get('sensors', [{}])[0].get('description')
+            sensor_id = node.get('sensors', [{}])[0].get('id')
+            last_check_timestamp = check_file(sensor_id)
+            if (last_data_push < datetime.datetime.utcnow() - datetime.timedelta(minutes=LAST_N_MINUTES) and
+                last_data_push > datetime.datetime.utcnow() - datetime.timedelta(hours=LAST_N_HOURS)):
+                uid = node.get('uid')
+                description = node.get('sensors', [{}])[0].get('description')
+                if show:
+                    click.echo("{} | {:>35} | {}".format(last_data_push, uid, description))
+                if not last_check_timestamp:
                     if push:
                         client = Client(PUSHOVER_CLIENT_TOKEN, api_token=PUSHOVER_API_TOKEN)
                         client.send_message("sensor: {}\ndescription: {}".format(uid, description),
                                             title="Sensor hasn't pushed in the last 5 minutes!")
-                    if show:
-                        click.echo("{} | {:>35} | {}".format(last_data_push, uid, description))
+                        # FIXME: calculate moment of last push and add into message
+                update_file(sensor_id, last_data_push)
+            elif last_check_timestamp:
+                # FIXME: send push message for sensor is back again
+                delete_file(sensor_id)
 
-if __name__ == '__main__':    
+if __name__ == '__main__':
     check()
