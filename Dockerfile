@@ -12,5 +12,5 @@ WORKDIR /opt/code
 RUN pip install -r /opt/code/requirements.txt
 
 #COPY config.py /opt/code
-CMD python monitor.py
+#CMD python monitor.py
 CMD python monitor.py --push
