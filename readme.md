@@ -41,4 +41,10 @@ chipid	name	label dustiID	MAC
 10673656	mysensor1	ESP1	155	18:fe:34:f4:aa:aa
 ~~~
 
+# get data and process to csv
+
+copy config.sh.template to config.sh and change the variable values in there, then run the ./getdata.sh script to download all data for the sensors into files, see result dir dusti.sensordata.<date>.<XXXX> for them.
+The script ./assembledatafromjson.py assembles a csv from the json files specified on commandline (e.g. dusti.sensordata.2015-10-14.z6OU/00/*.json)
+
+
 
