@@ -19,6 +19,15 @@ fi
 
 ssh $sshopts root@172.21.24.254 iw dev $iwdev station dump | grep -A 17 -i "$macp" | grep -i "$macp\|inactive\|signal\|bitrate"
 
+# find chipid.csv
+
+if [ ! -z "$(which realpath)" ] ; then
+	chk="$(dirname $(realpath $0))/$chipidfile"
+	if [ -f "$chk" ] ; then
+		chipidfile="$chk"
+	fi
+fi
+
 if [ -f "$chipidfile" ] ; then
 	for mac in $(ssh $sshopts root@172.21.24.254 iw dev $iwdev station dump | \
 		grep -i $macp | \

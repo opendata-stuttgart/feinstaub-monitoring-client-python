@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# TODO: fails for multiple sensor types/messages (multisens)
+# handle this better (check dict keys)
+
 import json
 import argparse
 import sys
