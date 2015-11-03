@@ -54,10 +54,10 @@ def check(push, show):
                                                         "%Y-%m-%dT%H:%M:%S")
             sensor_id = node.get('sensors', [{}])[0].get('id')
             last_check_timestamp = check_file(sensor_id)
+            uid = node.get('uid')
+            description = node.get('sensors', [{}])[0].get('description')
             if (last_data_push < datetime.datetime.utcnow() - datetime.timedelta(minutes=LAST_N_MINUTES) and
                 last_data_push > datetime.datetime.utcnow() - datetime.timedelta(hours=LAST_N_HOURS)):
-                uid = node.get('uid')
-                description = node.get('sensors', [{}])[0].get('description')
                 if show:
                     click.echo("{} | {:>35} | {}".format(last_data_push, uid, description))
                 if not last_check_timestamp:
