@@ -63,7 +63,7 @@ def check(push, show):
                 if not last_check_timestamp:
                     if push:
                         client.send_message("sensor: {}\ndescription: {}".format(uid, description),
-                                            title="Sensor hasn't pushed in the last 5 minutes!")
+                                            title="Sensor hasn't pushed in the last {} minutes!".format(LAST_N_MINUTES))
                         # FIXME: calculate moment of last push and add into message
                 update_file(sensor_id, last_data_push)
             elif last_check_timestamp:
