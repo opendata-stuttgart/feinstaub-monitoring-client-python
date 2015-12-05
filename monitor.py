@@ -8,8 +8,8 @@ from config import (
     API_TOKEN,
     LAST_N_HOURS,
     LAST_N_MINUTES,
-    PUSHOVER_API_TOKEN,
-    PUSHOVER_CLIENT_TOKEN,
+    # PUSHOVER_API_TOKEN,
+    # PUSHOVER_CLIENT_TOKEN,
 )
 from pushover import Client
 
@@ -46,8 +46,8 @@ def check(push, show):
     session = requests.Session()
     url = "https://api.dusti.xyz/v1/node/"
     r = session.get(url, headers=header)
-    if push:
-        client = Client(PUSHOVER_CLIENT_TOKEN, api_token=PUSHOVER_API_TOKEN)
+#    if push:
+#        client = Client(PUSHOVER_CLIENT_TOKEN, api_token=PUSHOVER_API_TOKEN)
     for node in r.json():
         if node.get("last_data_push"):
             last_data_push = datetime.datetime.strptime(node.get("last_data_push")[:19],
@@ -56,21 +56,29 @@ def check(push, show):
             last_check_timestamp = check_file(sensor_id)
             uid = node.get('uid')
             description = node.get('sensors', [{}])[0].get('description')
+            owner = node.get('owner')
+            sensor_type = None
+            for sensor in node.get('sensors'):
+                if sensor.get('sensor_type').get("id") == 1:
+                    sensor_type = sensor.get('sensor_type').get("name")
+            if not sensor_type:
+                continue
+            if show:
+                click.echo("{} | {:>30} | {} | {} | {}".format(last_data_push, uid, sensor_type, owner, description))
             if (last_data_push < datetime.datetime.utcnow() - datetime.timedelta(minutes=LAST_N_MINUTES) and
                 last_data_push > datetime.datetime.utcnow() - datetime.timedelta(hours=LAST_N_HOURS)):
-                if show:
-                    click.echo("{} | {:>35} | {}".format(last_data_push, uid, description))
-                if not last_check_timestamp:
-                    if push:
-                        client.send_message("sensor: {}\ndescription: {}".format(uid, description),
-                                            title="Sensor hasn't pushed in the last {} minutes!".format(LAST_N_MINUTES))
+#                if not last_check_timestamp:
+#                    if push:
+#                        client.send_message("sensor: {}\ndescription: {}".format(uid, description),
+#                                            title="Sensor hasn't pushed in the last {} minutes!".format(LAST_N_MINUTES))
                         # FIXME: calculate moment of last push and add into message
                 update_file(sensor_id, last_data_push)
             elif last_check_timestamp:
                 delete_file(sensor_id)
-                if push:
-                    client.send_message("RESTORED sensor: {}\ndescription: {}".format(uid, description),
-                                        title="Sensor is back again!")
+#                if push:
+#                    client.send_message("RESTORED sensor: {}\ndescription: {}".format(uid, description),
+#                                        title="Sensor is back again!")
+
 
 if __name__ == '__main__':
     check()
