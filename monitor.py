@@ -46,28 +46,31 @@ def check(push, show):
     session = requests.Session()
     url = "https://api.dusti.xyz/v1/node/"
     r = session.get(url, headers=header)
+    if push:
+        client = Client(PUSHOVER_CLIENT_TOKEN, api_token=PUSHOVER_API_TOKEN)
     for node in r.json():
         if node.get("last_data_push"):
             last_data_push = datetime.datetime.strptime(node.get("last_data_push")[:19],
                                                         "%Y-%m-%dT%H:%M:%S")
             sensor_id = node.get('sensors', [{}])[0].get('id')
             last_check_timestamp = check_file(sensor_id)
+            uid = node.get('uid')
+            description = node.get('sensors', [{}])[0].get('description')
             if (last_data_push < datetime.datetime.utcnow() - datetime.timedelta(minutes=LAST_N_MINUTES) and
                 last_data_push > datetime.datetime.utcnow() - datetime.timedelta(hours=LAST_N_HOURS)):
-                uid = node.get('uid')
-                description = node.get('sensors', [{}])[0].get('description')
                 if show:
                     click.echo("{} | {:>35} | {}".format(last_data_push, uid, description))
                 if not last_check_timestamp:
                     if push:
-                        client = Client(PUSHOVER_CLIENT_TOKEN, api_token=PUSHOVER_API_TOKEN)
                         client.send_message("sensor: {}\ndescription: {}".format(uid, description),
-                                            title="Sensor hasn't pushed in the last 5 minutes!")
+                                            title="Sensor hasn't pushed in the last {} minutes!".format(LAST_N_MINUTES))
                         # FIXME: calculate moment of last push and add into message
                 update_file(sensor_id, last_data_push)
             elif last_check_timestamp:
-                # FIXME: send push message for sensor is back again
                 delete_file(sensor_id)
+                if push:
+                    client.send_message("RESTORED sensor: {}\ndescription: {}".format(uid, description),
+                                        title="Sensor is back again!")
 
 if __name__ == '__main__':
     check()
